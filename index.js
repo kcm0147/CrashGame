@@ -29,6 +29,10 @@ var brickPadding = 10;
 var brickOffsetTop = canvas.height / 2 - 300;
 var brickOffsetLeft = canvas.width / 2 - 200;
 
+//score
+
+var score = 0;
+
 
 
 function Init(){
@@ -40,6 +44,12 @@ function Init(){
             bricks[c][r] = { x: 0, y: 0, status: 1 };
         }
     }
+}
+
+function drawScore(){
+    ctx.font = 'bold 24px Courier New'
+    ctx.fillStyle = "black";
+    ctx.fillText("Score: "+score, 40, 80);
 }
 
 function drawWall() {
@@ -71,6 +81,12 @@ function collisionWall() {
             if (b.status==1 && x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
                 dy = -dy;
                 b.status=0;
+                score++;
+
+                if(score==brickColumn*brickHeight){
+                    alert("FINISH!!!");
+                    document.location.reload();
+                }
             }
         }
     }
@@ -105,10 +121,10 @@ function collision() {
         if (x > paddleX && x < paddleX + paddleWidth) {
             dy = -dy;
         }
-        // else {
-        //     alert("GAME OVER!! RETRY IT !");
-        //     document.location.reload();
-        // }
+        else {
+            alert("GAME OVER!! RETRY IT !");
+            document.location.reload();
+        }
     }
 
     if (rightPressed && paddleX < canvas.width - paddleWidth) {
@@ -122,35 +138,27 @@ function collision() {
 function draw() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawScore();
     drawBall();
     drawPaddle();
     drawWall();
     collision();
     collisionWall();
+
     x += dx;
     y += dy;
 }
 
-function keyDownHandler(e) {
-    if (e.keyCode == 39) {
-        rightPressed = true;
-    }
-    else if (e.keyCode == 37) {
-        leftPressed = true;
+
+function mouseMoveHandler(e) {
+    var relativeX = e.clientX - canvas.offsetLeft;
+    if(relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth/2;
     }
 }
 
-function keyUpHandler(e) {
-    if (e.keyCode == 39) {
-        rightPressed = false;
-    }
-    else if (e.keyCode == 37) {
-        leftPressed = false;
-    }
-}
 
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
+document.addEventListener("mousemove", mouseMoveHandler, false);
 
 Init();
-setInterval(draw, 10);
+setInterval(draw,10)
