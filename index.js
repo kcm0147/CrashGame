@@ -142,8 +142,9 @@ function draw() {
     drawBall();
     drawPaddle();
     drawWall();
-    collision();
     collisionWall();
+    collision();
+    
 
     x += dx;
     y += dy;
