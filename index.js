@@ -6,6 +6,8 @@ var ballSize = 15;
 var dx = 3;
 var dy = -3;
 
+var lives = 1;
+
 //paddle
 var paddleHeight = 10;
 var paddleWidth = 75;
@@ -35,7 +37,7 @@ var score = 0;
 
 
 
-function Init(){
+function Init() {
 
     //draw wall
     for (var c = 0; c < brickColumn; c++) {
@@ -46,10 +48,10 @@ function Init(){
     }
 }
 
-function drawScore(){
+function drawScore() {
     ctx.font = 'bold 24px Courier New'
     ctx.fillStyle = "black";
-    ctx.fillText("Score: "+score, 40, 80);
+    ctx.fillText("Score: " + score, 40, 80);
 }
 
 function drawWall() {
@@ -78,12 +80,12 @@ function collisionWall() {
     for (var c = 0; c < brickColumn; c++) {
         for (var r = 0; r < brickRow; r++) {
             var b = bricks[c][r];
-            if (b.status==1 && x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+            if (b.status == 1 && x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
                 dy = -dy;
-                b.status=0;
+                b.status = 0;
                 score++;
 
-                if(score==brickColumn*brickHeight){
+                if (score == brickColumn * brickHeight) {
                     alert("FINISH!!!");
                     document.location.reload();
                 }
@@ -117,13 +119,17 @@ function collision() {
 
     if (y + dy < ballSize) {
         dy = -dy;
-    } else if (y + dy > canvas.height - ballSize) {
+    }
+    else if (y + dy > canvas.height - ballSize) {
         if (x > paddleX && x < paddleX + paddleWidth) {
             dy = -dy;
         }
         else {
-            alert("GAME OVER!! RETRY IT !");
-            document.location.reload();
+            lives--;
+            if (!lives) {
+                alert("GAME OVER!! RETRY IT !");
+                document.location.reload()
+            }
         }
     }
 
@@ -133,6 +139,7 @@ function collision() {
     else if (leftPressed && paddleX > 0) {
         paddleX -= 4;
     }
+
 }
 
 function draw() {
@@ -144,8 +151,6 @@ function draw() {
     drawWall();
     collisionWall();
     collision();
-    
-
     x += dx;
     y += dy;
 }
@@ -153,8 +158,8 @@ function draw() {
 
 function mouseMoveHandler(e) {
     var relativeX = e.clientX - canvas.offsetLeft;
-    if(relativeX > 0 && relativeX < canvas.width) {
-        paddleX = relativeX - paddleWidth/2;
+    if (relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
     }
 }
 
@@ -162,4 +167,4 @@ function mouseMoveHandler(e) {
 document.addEventListener("mousemove", mouseMoveHandler, false);
 
 Init();
-setInterval(draw,10)
+setInterval(draw, 10)
