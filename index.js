@@ -32,8 +32,12 @@ var brickOffsetTop = canvas.height / 2 - 300;
 var brickOffsetLeft = canvas.width / 2 - 300;
 
 //score
-
 var score = 0;
+
+//time
+
+var start = 0;
+var change = 0;
 
 
 
@@ -54,7 +58,21 @@ function Init() {
 function drawScore() {
     ctx.font = 'bold 24px Courier New'
     ctx.fillStyle = "black";
-    ctx.fillText("Score: " + score, 40, 80);
+    ctx.fillText("Score: " + score, 30, 80);
+}
+
+function drawTime(){
+    ctx.font = 'bold 24px Courier New'
+    ctx.fillStyle = "black";
+
+    if(start-change>8){
+        change=start;
+        dx+=(dx*0.04)
+        dy+=(dy*0.04)
+
+    }
+    start+=0.01;
+    ctx.fillText("Time: "+start.toFixed(1)+" sec", 30, 120);
 }
 
 function drawWall() {
@@ -159,6 +177,7 @@ function draw() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawScore();
+    drawTime();
     drawBall();
     drawPaddle();
     drawWall();
