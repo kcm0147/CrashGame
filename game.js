@@ -3,6 +3,7 @@ var ctx = canvas.getContext("2d");
 var x = canvas.width / 2;
 var y = canvas.height - 30;
 var ballSize = 15;
+var ballColor = "black";
 var dx = 0;
 var dy = -5;
 
@@ -18,15 +19,14 @@ var rightPressed = false;
 var leftPressed = false;
 
 //wall
-
 var bricks = [];
-var brickRow = 9;
-var brickColumn = 9;
+var brickRow = 7;
+var brickColumn = 7;
 
 var brickWidth = 75;
 var brickHeight = 20;
 
-var brickPadding = 10;
+var brickPadding = 2;
 
 var brickOffsetTop = canvas.height / 2 - 300;
 var brickOffsetLeft = canvas.width / 2 - 300;
@@ -35,24 +35,30 @@ var brickOffsetLeft = canvas.width / 2 - 300;
 var score = 0;
 
 //time
-
 var start = 0;
 var change = 0;
+
+//fireBall
+var fireBall = { status: false, x: 0, y: 0, dx: 0, dy: 0 };
+var fireBallCnt = 0;
 
 
 
 function Init() {
 
     var rand;
-    //draw wall
+
     for (var c = 0; c < brickColumn; c++) {
         bricks[c] = [];
         for (var r = 0; r < brickRow; r++) {
-            rand=Math.floor((Math.random()*3)+1);
-            console.log(rand);
-            bricks[c][r] = { x: 0, y: 0, status: rand };
+            rand = Math.floor((Math.random() * 3) + 1);
+            item = Math.floor((Math.random() * 8) + 1);
+
+            bricks[c][r] = { x: 0, y: 0, status: rand, item: 1 };
         }
     }
+
+    document.addEventListener("mousemove", mouseMoveHandler, false);
 }
 
 function drawScore() {
@@ -61,18 +67,40 @@ function drawScore() {
     ctx.fillText("Score: " + score, 30, 80);
 }
 
-function drawTime(){
+function drawTime() {
     ctx.font = 'bold 24px Courier New'
     ctx.fillStyle = "black";
 
-    if(start-change>8){
-        change=start;
-        dx+=(dx*0.04)
-        dy+=(dy*0.04)
+    if (start - change > 8) {
+        change = start;
+        dx += (dx * 0.04)
+        dy += (dy * 0.04)
 
     }
-    start+=0.01;
-    ctx.fillText("Time: "+start.toFixed(1)+" sec", 30, 120);
+    start += 0.01;
+    ctx.fillText("Time: " + start.toFixed(1) + " sec", 30, 120);
+}
+
+function drawFireBall() {
+
+    if (fireBall.status) {
+        ctx.beginPath();
+        ctx.arc(fireBall.x, fireBall.y, ballSize, 0, Math.PI * 2, false);
+        ctx.fillStyle = 'red'
+        ctx.fill();
+        ctx.closePath();
+        fireBall.x+=fireBall.dx;
+        fireBall.y+=fireBall.dy;
+
+        if ((fireBall.y + fireBall.dy > canvas.height - ballSize) && (fireBall.x >= paddleX - 10 && fireBall.x <= paddleX + paddleWidth + 10)) {
+            fireBall.status=false;
+            fireBallCnt++;
+            console.log("ok");
+        }
+        else if (fireBall.y + fireBall.dy > canvas.height - ballSize) {
+            fireBall.status=false;
+        }
+    }
 }
 
 function drawWall() {
@@ -80,7 +108,7 @@ function drawWall() {
 
     for (var c = 0; c < brickColumn; c++) {
         for (var r = 0; r < brickRow; r++) {
-            if (bricks[c][r].status == 1 || bricks[c][r].status==2 || bricks[c][r].status==3) {
+            if (bricks[c][r].status == 1 || bricks[c][r].status == 2 || bricks[c][r].status == 3) {
                 var brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
                 var brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
                 bricks[c][r].x = brickX;
@@ -88,11 +116,11 @@ function drawWall() {
                 ctx.beginPath();
                 ctx.rect(brickX, brickY, brickWidth, brickHeight);
 
-                if(bricks[c][r].status==1)
+                if (bricks[c][r].status == 1)
                     ctx.fillStyle = "#6F4F28";
-                else if(bricks[c][r].status==2)
+                else if (bricks[c][r].status == 2)
                     ctx.fillStyle = "black";
-                else if(bricks[c][r].status==3)
+                else if (bricks[c][r].status == 3)
                     ctx.fillStyle = "grey";
 
                 ctx.fill();
@@ -110,10 +138,19 @@ function collisionWall() {
             var b = bricks[c][r];
             if (b.status > 0 && x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
                 dy = -dy;
-                --b.status;
 
-                if(b.status==0)
+                --b.status;
+                if (b.status == 0) {
                     score++;
+                    if (b.item == 1 && !fireBall.status) {
+                        fireBall.status = true;
+                        fireBall.x = b.x;
+                        fireBall.y = b.y;
+                        fireBall.dx = 0;
+                        fireBall.dy = 2;
+                        fireBallCnt++;
+                    }
+                }
 
                 if (score == brickColumn * brickHeight) {
                     alert("FINISH!!!");
@@ -135,9 +172,8 @@ function drawPaddle() {
 function drawBall() {
     ctx.beginPath();
     ctx.arc(x, y, ballSize, 0, Math.PI * 2, false);
-    ctx.fillStyle = "#001234";
+    ctx.fillStyle = ballColor;
     ctx.fill();
-    ctx.stroke(); // 원 외곽선
     ctx.closePath();
 }
 
@@ -151,9 +187,9 @@ function collision() {
         dy = -dy;
     }
     else if (y + dy > canvas.height - ballSize) {
-        if (x >= paddleX && x <= paddleX + paddleWidth) {
-            dx = -((paddleX + (paddleWidth/2)-x) / (paddleWidth))*10;
-            dy=-dy;
+        if (x >= paddleX - 10 && x <= paddleX + paddleWidth + 10) {
+            dx = -((paddleX + (paddleWidth / 2) - x) / (paddleWidth)) * 10;
+            dy = -dy;
         }
         else {
             lives--;
@@ -164,12 +200,7 @@ function collision() {
         }
     }
 
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-        paddleX += 4;
-    }
-    else if (leftPressed && paddleX > 0) {
-        paddleX -= 4;
-    }
+
 
 }
 
@@ -179,6 +210,7 @@ function draw() {
     drawScore();
     drawTime();
     drawBall();
+    drawFireBall();
     drawPaddle();
     drawWall();
     collisionWall();
@@ -196,7 +228,6 @@ function mouseMoveHandler(e) {
 }
 
 
-document.addEventListener("mousemove", mouseMoveHandler, false);
 
 Init();
 setInterval(draw, 10)

@@ -53,11 +53,8 @@ function collision(ball) {
         ball.dx = -ball.dx;
     }
 
-    if (ball.y + ball.dy < ball.size) {
+    if (ball.y + ball.dy < ball.size || ball.y + ball.dy > canvas.height - ball.size) {
         ball.dy = -ball.dy;
-    }
-    else if (ball.y + ball.dy > canvas.height - ball.size) {
-            ball.dy=-ball.dy;
     }
 }
 
@@ -91,8 +88,7 @@ function on_mousemove (ev) {
       x = ev.layerX;
       y = ev.layerY;
     }
-    x-=canvas.offsetLeft;
-    y-=canvas.offsetTop;
+   
   
     //is the mouse over the link?
     if(x>=linkX && x <= (linkX + linkWidth) && y<=linkY && y>= (linkY-linkHeight)){

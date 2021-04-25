@@ -1,1 +1,9 @@
-canvas { background: rgb(224, 216, 216); display: block; margin: 0 auto; }
+canvas { 
+    background: rgb(235, 218, 218); 
+    display: block; 
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 150px;
+}
