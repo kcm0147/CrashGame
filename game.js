@@ -1,4 +1,4 @@
-var canvas = document.getElementById("myCanvas");
+var canvas = document.getElementById("mainCanvas");
 var ctx = canvas.getContext("2d");
 
 // ball Init
@@ -23,8 +23,8 @@ var leftPressed = false;
 
 //wall
 var bricks = [];
-var brickRow = 7;
-var brickColumn = 7;
+var brickRow = 6;
+var brickColumn = 6;
 
 var brickWidth = 75;
 var brickHeight = 20;
@@ -32,7 +32,7 @@ var brickHeight = 20;
 var brickPadding = 2;
 
 var brickOffsetTop = canvas.height / 2 - 300;
-var brickOffsetLeft = canvas.width / 2 - 300;
+var brickOffsetLeft = canvas.width / 2 - 200;
 
 //score
 var score = 0;
@@ -126,11 +126,11 @@ function drawWall() {
                 ctx.rect(brickX, brickY, brickWidth, brickHeight);
 
                 if (bricks[c][r].status == 1)
-                    ctx.fillStyle = "#6F4F28";
+                    ctx.fillStyle = "#E6C17B";
                 else if (bricks[c][r].status == 2)
-                    ctx.fillStyle = "black";
+                    ctx.fillStyle = "#C2722E";
                 else if (bricks[c][r].status == 3)
-                    ctx.fillStyle = "grey";
+                    ctx.fillStyle = "#8B4513";
 
                 ctx.fill();
                 ctx.closePath();
@@ -237,7 +237,7 @@ function collision() {
         else {
             lives--;
             if (!lives) {
-                alert("GAME OVER!! RETRY IT !");
+                alert("GAME OVER!! Your Record is "+score);
                 document.location.reload()
             }
         }
