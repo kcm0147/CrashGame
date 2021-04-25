@@ -58,7 +58,7 @@ function Init() {
         bricks[c] = [];
         for (var r = 0; r < brickRow; r++) {
             rand = Math.floor((Math.random() * 3) + 1);
-            item = Math.floor((Math.random() * 5) + 1);
+            item = Math.floor((Math.random() * 3) + 1);
 
             bricks[c][r] = { x: 0, y: 0, status: rand, item: item };
         }
@@ -232,7 +232,7 @@ function collision() {
                 ball.ballColor = 'black'
                 ball.status = 'normal'
             }
-            
+
         }
         else {
             lives--;

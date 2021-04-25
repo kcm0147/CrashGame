@@ -71,10 +71,11 @@ function drawTitle(){
     ctx.fillText(linkText,linkX,linkY);
     linkWidth=ctx.measureText(linkText).width;
 
-    ctx.fillText("Crash Game",linkX-10,linkY-50);
+    ctx.font='40px sans-serif';
+    ctx.fillText("Crash Game",linkX-30,linkY-50);
 
     ctx.globalCompositeOperation='destination-over';
-    ctx.rect(linkX-15, linkY-30, linkWidth+30, linkHeight+20);
+    ctx.rect(linkX-12, linkY-30, linkWidth+30, linkHeight+20);
     ctx.fillStyle="green";
     ctx.fill();
 
