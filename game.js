@@ -1,5 +1,8 @@
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
+
+// ball Init
+var ball;
 var x = canvas.width / 2;
 var y = canvas.height - 30;
 var ballSize = 15;
@@ -41,10 +44,13 @@ var change = 0;
 //fireBall
 var fireBall = { status: false, x: 0, y: 0, dx: 0, dy: 0 };
 var fireBallCnt = 0;
+var wallCrash=false;
 
 
 
 function Init() {
+
+    ball = { x: x, y: y, dx: dx, dy: dy, ballSize: ballSize, ballColor: 'black', status: 'normal' };
 
     var rand;
 
@@ -52,9 +58,9 @@ function Init() {
         bricks[c] = [];
         for (var r = 0; r < brickRow; r++) {
             rand = Math.floor((Math.random() * 3) + 1);
-            item = Math.floor((Math.random() * 8) + 1);
+            item = Math.floor((Math.random() * 5) + 1);
 
-            bricks[c][r] = { x: 0, y: 0, status: rand, item: 1 };
+            bricks[c][r] = { x: 0, y: 0, status: rand, item: item };
         }
     }
 
@@ -73,8 +79,8 @@ function drawTime() {
 
     if (start - change > 8) {
         change = start;
-        dx += (dx * 0.04)
-        dy += (dy * 0.04)
+        ball.dx += (ball.dx * 0.04)
+        ball.dy += (ball.dy * 0.04)
 
     }
     start += 0.01;
@@ -89,16 +95,19 @@ function drawFireBall() {
         ctx.fillStyle = 'red'
         ctx.fill();
         ctx.closePath();
-        fireBall.x+=fireBall.dx;
-        fireBall.y+=fireBall.dy;
+        fireBall.x += fireBall.dx;
+        fireBall.y += fireBall.dy;
 
         if ((fireBall.y + fireBall.dy > canvas.height - ballSize) && (fireBall.x >= paddleX - 10 && fireBall.x <= paddleX + paddleWidth + 10)) {
-            fireBall.status=false;
+            fireBall.status = false;
             fireBallCnt++;
-            console.log("ok");
+
+            ball.status = 'fire'
+            ball.ballColor = 'red'
+            wallCrash=false;
         }
         else if (fireBall.y + fireBall.dy > canvas.height - ballSize) {
-            fireBall.status=false;
+            fireBall.status = false;
         }
     }
 }
@@ -136,13 +145,22 @@ function collisionWall() {
     for (var c = 0; c < brickColumn; c++) {
         for (var r = 0; r < brickRow; r++) {
             var b = bricks[c][r];
-            if (b.status > 0 && x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
-                dy = -dy;
 
-                --b.status;
-                if (b.status == 0) {
+
+
+            if (b.status > 0 && ball.x > b.x && ball.x < b.x + brickWidth && ball.y > b.y && ball.y < b.y + brickHeight) {
+
+                if (ball.status == 'normal') {
+                    ball.dy = -ball.dy;
+                    --b.status;
+                }
+                else if (ball.status == 'fire') {
+                    b.status -= 3;
+                }
+
+                if (b.status <= 0) {
                     score++;
-                    if (b.item == 1 && !fireBall.status) {
+                    if (b.item == 1 && !fireBall.status && ball.status == 'normal') {
                         fireBall.status = true;
                         fireBall.x = b.x;
                         fireBall.y = b.y;
@@ -150,12 +168,17 @@ function collisionWall() {
                         fireBall.dy = 2;
                         fireBallCnt++;
                     }
+
+                    if(ball.status=='fire'){
+                        wallCrash=true;
+                    }
                 }
 
                 if (score == brickColumn * brickHeight) {
                     alert("FINISH!!!");
                     document.location.reload();
                 }
+
             }
         }
     }
@@ -171,25 +194,45 @@ function drawPaddle() {
 
 function drawBall() {
     ctx.beginPath();
-    ctx.arc(x, y, ballSize, 0, Math.PI * 2, false);
-    ctx.fillStyle = ballColor;
+    ctx.arc(ball.x, ball.y, ball.ballSize, 0, Math.PI * 2, false);
+    ctx.fillStyle = ball.ballColor;
     ctx.fill();
     ctx.closePath();
 }
 
 function collision() {
 
-    if (x + dx > canvas.width - ballSize || x + dx < ballSize) {
-        dx = -dx;
+    if (ball.x + ball.dx > canvas.width - ball.ballSize || ball.x + ball.dx < ball.ballSize) {
+        ball.dx = -ball.dx;
+
+        if (ball.status == 'fire' && wallCrash) {
+            wallCrash = false;
+            ball.ballColor = 'black'
+            ball.status = 'normal'
+        }
     }
 
-    if (y + dy < ballSize) {
-        dy = -dy;
+    if (ball.y + ball.dy < ball.ballSize) {
+        ball.dy = -ball.dy;
+
+        if (ball.status == 'fire' && wallCrash) {
+            wallCrash = false;
+            ball.ballColor = 'black'
+            ball.status = 'normal'
+        }
     }
-    else if (y + dy > canvas.height - ballSize) {
-        if (x >= paddleX - 10 && x <= paddleX + paddleWidth + 10) {
-            dx = -((paddleX + (paddleWidth / 2) - x) / (paddleWidth)) * 10;
-            dy = -dy;
+
+    else if (ball.y + ball.dy > canvas.height - ball.ballSize) {
+        if (ball.x >= paddleX - 10 && ball.x <= paddleX + paddleWidth + 10) {
+            ball.dx = -((paddleX + (paddleWidth / 2) - ball.x) / (paddleWidth)) * 10;
+            ball.dy = -ball.dy;
+
+            if (ball.status == 'fire' && wallCrash) {
+                wallCrash = false;
+                ball.ballColor = 'black'
+                ball.status = 'normal'
+            }
+            
         }
         else {
             lives--;
@@ -199,6 +242,7 @@ function collision() {
             }
         }
     }
+
 
 
 
@@ -215,8 +259,8 @@ function draw() {
     drawWall();
     collisionWall();
     collision();
-    x += dx;
-    y += dy;
+    ball.x += ball.dx;
+    ball.y += ball.dy;
 }
 
 
