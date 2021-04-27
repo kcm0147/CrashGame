@@ -5,7 +5,7 @@ var y = canvas.height - 30;
 
 
 // canvas link
-var linkX=canvas.width /2;
+var linkX=canvas.width /2-50;
 var linkY=canvas.height /2;
 var linkHeight=20;
 var linkWidth;
