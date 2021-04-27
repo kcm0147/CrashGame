@@ -10,7 +10,16 @@ var height=25;
 function drawExplain() {
     subCtx.clearRect(0, 0, subCanvas.width, subCanvas.height);
     
+
     subCtx.beginPath();
+
+    subCtx.font = 'bold 32px Courier New'
+    subCtx.fillStyle = "black";
+    subCtx.fillText("Mouse Move!!", firstX+10, firstY-70);
+    subCtx.closePath();
+
+    subCtx.beginPath();
+
     subCtx.rect(firstX, firstY, width, height);
     subCtx.fillStyle = "#E6C17B";
     subCtx.fill();
@@ -52,6 +61,17 @@ function drawExplain() {
     subCtx.fillStyle = "black";
     subCtx.fillText("Fire", firstX+130, firstY+240);
 
+    subCtx.closePath();
+
+    subCtx.beginPath();
+    subCtx.rect(firstX-15, firstY+310, 95, 10);
+    subCtx.fillStyle = 'green'
+    subCtx.fill();
+
+    subCtx.font = 'bold 21px Courier New'
+    subCtx.fillStyle = "black";
+    subCtx.fillText("Wide Paddle", firstX+100, firstY+310);
+    subCtx.fillText("(7s)", firstX+140, firstY+340);
     subCtx.closePath();
 
 }

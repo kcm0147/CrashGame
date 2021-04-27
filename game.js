@@ -13,6 +13,7 @@ var dy = -5;
 var lives = 1;
 
 //paddle
+var paddleColor = 'blue';
 var paddleHeight = 10;
 var paddleWidth = 95;
 var paddleX = (canvas.width - paddleWidth) / 2;
@@ -25,12 +26,9 @@ var leftPressed = false;
 var bricks = [];
 var brickRow = 6;
 var brickColumn = 6;
-
 var brickWidth = 75;
 var brickHeight = 20;
-
 var brickPadding = 2;
-
 var brickOffsetTop = canvas.height / 2 - 300;
 var brickOffsetLeft = canvas.width / 2 - 200;
 
@@ -40,11 +38,18 @@ var score = 0;
 //time
 var start = 0;
 var change = 0;
+var paddleItemStart = 0;
 
 //fireBall
 var fireBall = { status: false, x: 0, y: 0, dx: 0, dy: 0 };
 var fireBallCnt = 0;
 var wallCrash=false;
+var check=false;
+
+// widePaddle
+
+var widePaddle = { status: false, x: 0, y: 0, dx: 0, dy: 0 };
+var widePaddleCnt = 0;
 
 
 
@@ -84,8 +89,37 @@ function drawTime() {
 
     }
     start += 0.01;
+
+    if(widePaddleCnt==1){
+        paddleItemStart +=0.01;
+    }
+
     ctx.fillText("Time: " + start.toFixed(1) + " sec", 30, 120);
 }
+
+
+function drawWidePaddle() {
+
+    
+    if(widePaddle.status){
+        ctx.beginPath();
+        ctx.rect(widePaddle.x, widePaddle.y,95,10);
+        ctx.fillStyle = 'green'
+        ctx.fill();
+        ctx.closePath();
+        widePaddle.y+=widePaddle.dy;
+
+        if ((widePaddle.y + widePaddle.dy > canvas.height - ballSize) && (widePaddle.x >= paddleX - paddleWidth && widePaddle.x <= paddleX + paddleWidth)) {
+            paddleColor='green';
+            widePaddleCnt=1;
+            paddleWidth=155;
+        }
+        else if (widePaddle.y + widePaddle.dy > canvas.height - ballSize) {
+            widePaddle.status=false;
+        }
+    }
+    
+} 
 
 function drawFireBall() {
 
@@ -95,13 +129,10 @@ function drawFireBall() {
         ctx.fillStyle = 'red'
         ctx.fill();
         ctx.closePath();
-        fireBall.x += fireBall.dx;
         fireBall.y += fireBall.dy;
 
         if ((fireBall.y + fireBall.dy > canvas.height - ballSize) && (fireBall.x >= paddleX - 10 && fireBall.x <= paddleX + paddleWidth + 10)) {
-            fireBall.status = false;
             fireBallCnt++;
-
             ball.status = 'fire'
             ball.ballColor = 'red'
             wallCrash=false;
@@ -146,8 +177,6 @@ function collisionWall() {
         for (var r = 0; r < brickRow; r++) {
             var b = bricks[c][r];
 
-
-
             if (b.status > 0 && ball.x > b.x && ball.x < b.x + brickWidth && ball.y > b.y && ball.y < b.y + brickHeight) {
 
                 if (ball.status == 'normal') {
@@ -160,11 +189,18 @@ function collisionWall() {
 
                 if (b.status <= 0) {
                     score++;
+
+                    if (b.item == 2 && !widePaddle.status && widePaddleCnt==0){
+                        widePaddle.status = true;
+                        widePaddle.x=b.x;
+                        widePaddle.y=b.y;
+                        widePaddle.dy=2;
+                    }
+
                     if (b.item == 1 && !fireBall.status && ball.status == 'normal') {
                         fireBall.status = true;
                         fireBall.x = b.x;
-                        fireBall.y = b.y;
-                        fireBall.dx = 0;
+                        fireBall.y = b.y;                        
                         fireBall.dy = 2;
                         fireBallCnt++;
                     }
@@ -185,9 +221,18 @@ function collisionWall() {
 }
 
 function drawPaddle() {
+
+    if(paddleItemStart>7){
+        widePaddleCnt=0;
+        paddleItemStart=0;
+        widePaddle.status=false;
+        paddleWidth=95;
+        paddleColor='blue';
+    }
+
     ctx.beginPath();
     ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = "#0034DA";
+    ctx.fillStyle = paddleColor;
     ctx.fill();
     ctx.closePath();
 }
@@ -204,8 +249,9 @@ function collision() {
 
     if (ball.x + ball.dx > canvas.width - ball.ballSize || ball.x + ball.dx < ball.ballSize) {
         ball.dx = -ball.dx;
-
+        
         if (ball.status == 'fire' && wallCrash) {
+            fireBall.status=false;
             wallCrash = false;
             ball.ballColor = 'black'
             ball.status = 'normal'
@@ -214,20 +260,21 @@ function collision() {
 
     if (ball.y + ball.dy < ball.ballSize) {
         ball.dy = -ball.dy;
-
+        
         if (ball.status == 'fire' && wallCrash) {
+            fireBall.status=false;
             wallCrash = false;
             ball.ballColor = 'black'
             ball.status = 'normal'
         }
     }
-
     else if (ball.y + ball.dy > canvas.height - ball.ballSize) {
         if (ball.x >= paddleX - 10 && ball.x <= paddleX + paddleWidth + 10) {
             ball.dx = -((paddleX + (paddleWidth / 2) - ball.x) / (paddleWidth)) * 10;
             ball.dy = -ball.dy;
-
+            
             if (ball.status == 'fire' && wallCrash) {
+                fireBall.status=false;
                 wallCrash = false;
                 ball.ballColor = 'black'
                 ball.status = 'normal'
@@ -244,8 +291,6 @@ function collision() {
     }
 
 
-
-
 }
 
 function draw() {
@@ -255,6 +300,7 @@ function draw() {
     drawTime();
     drawBall();
     drawFireBall();
+    drawWidePaddle();
     drawPaddle();
     drawWall();
     collisionWall();
@@ -275,3 +321,4 @@ function mouseMoveHandler(e) {
 
 Init();
 setInterval(draw, 10)
+
